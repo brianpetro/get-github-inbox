@@ -1,0 +1,14 @@
+{
+  "type": "module",
+  "scripts": {
+    "test": "npx ava --verbose"
+  },
+  "dependencies": {
+    "graphql-request": "^4.0.0",
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {
+    "ava": "^3.15.0",
+    "dotenv": "^16.4.5"
+  }
+}
