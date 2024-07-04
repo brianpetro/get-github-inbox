@@ -29,6 +29,7 @@ class SmartSyncMd {
     this.created = [];
     this.updated = [];
     this.skipped = [];
+    this.since = opts.since ? new Date(opts.since) : null;
   }
 
   async fetch_github_api(url) {
@@ -54,7 +55,7 @@ class SmartSyncMd {
     let results = [];
     let page = 1;
     while (page <= this.page_limit) {
-      const paged_url = `${url}?page=${page}&per_page=${this.per_page}&state=all`;
+      const paged_url = `${url}?page=${page}&per_page=${this.per_page}&state=all${this.since ? `&since=${this.since.toISOString()}` : ''}`;
       // console.log('Fetching page:', page);
       const data = await this.fetch_github_api(paged_url);
       // console.log('Fetched page data:', data);
@@ -85,7 +86,7 @@ class SmartSyncMd {
     const query = gql`
       {
         repository(owner: "${this.repo_owner}", name: "${this.repo_name}") {
-          discussions(first: ${this.per_page}, after: ${afterCursor ? `"${afterCursor}"` : null}) {
+          discussions(first: ${this.per_page}, after: ${afterCursor ? `"${afterCursor}"` : null}${this.since ? `, updatedSince: "${this.since.toISOString()}"` : ''}) {
             edges {
               node {
                 id
@@ -170,6 +171,7 @@ export async function get_github_inbox(env, params) {
     repo_name: params.action.settings.repository_name,
     per_page: params.per_page || 10,
     page_limit: params.page_limit || 1,
+    since: params.since,
   });
 
   const status = params.status || 'all';
@@ -221,6 +223,15 @@ export const openapi = {
             schema: {
               type: "string",
               enum: ["new", "replied"],
+            }
+          },
+          {
+            name: "since",
+            in: "query",
+            description: "Fetch issues and discussions updated after this date (YYYY-MM-DD)",
+            schema: {
+              type: "string",
+              format: "date"
             }
           }
         ],
