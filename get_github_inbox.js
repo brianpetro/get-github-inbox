@@ -164,7 +164,7 @@ class SmartSyncMd {
   }
 }
 
-export async function get_github_inbox(env, params) {
+export async function get_github_inbox({env, ...params}) {
   const smart_sync_md = new SmartSyncMd({
     api_key: params.action.settings.personal_access_token,
     repo_owner: params.action.settings.repository_owner,
